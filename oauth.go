@@ -27,6 +27,8 @@ const (
 	ScopeChannelReadPredictions   Scope = "channel:read:predictions"
 	ScopeChannelReadStreamKey     Scope = "channel:read:stream_key"
 	ScopeChannelReadSubscriptions Scope = "channel:read:subscriptions"
+	ScopeChatEdit                 Scope = "chat:edit"
+	ScopeChatRead                 Scope = "chat:read"
 	ScopeClipsEdit                Scope = "clips:edit"
 	ScopeModerationRead           Scope = "moderation:read"
 	ScopeModeratorManageAutomod   Scope = "moderator:manage:automod"
@@ -45,8 +47,9 @@ func (s Scope) IsValid() bool {
 		ScopeChannelManageBroadcast, ScopeChannelManageExtensions, ScopeChannelManagePolls, ScopeChannelManagePredictions,
 		ScopeChannelManageRedemptions, ScopeChannelManageSchedule, ScopeChannelManageVideos, ScopeChannelReadEditors,
 		ScopeChannelReadHypeTrain, ScopeChannelReadPolls, ScopeChannelReadPredictions, ScopeChannelReadStreamKey,
-		ScopeChannelReadSubscriptions, ScopeClipsEdit, ScopeModerationRead, ScopeModeratorManageAutomod, ScopeUserEdit,
-		ScopeUserEditFollows, ScopeUserManageBlockedUsers, ScopeUserReadBroadcast, ScopeUserReadEmail, ScopeUserReadFollows,
+		ScopeChannelReadSubscriptions, ScopeChatEdit, ScopeChatRead, ScopeClipsEdit, ScopeModerationRead,
+		ScopeModeratorManageAutomod, ScopeUserEdit, ScopeUserEditFollows, ScopeUserManageBlockedUsers,
+		ScopeUserReadBroadcast, ScopeUserReadEmail, ScopeUserReadFollows,
 		ScopeUserReadSubscriptions:
 		return true
 	}
@@ -112,4 +115,3 @@ func GenerateOAuthUrl(options OAuthOptions) (*url.URL, error) {
 	vals := options.Values()
 	return url.Parse(OAuthUrl + "?" + vals.Encode())
 }
-
