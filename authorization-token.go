@@ -43,3 +43,27 @@ func ExchangeAuthToken(clientId, clientSecret, code, redirect string, timeout ti
 	}
 	return &t, nil
 }
+
+func RefreshToken(clientId, clientSecret, refreshToken string, timeout time.Duration) (*Token, error) {
+	vals := url.Values{}
+	vals.Add("client_id", clientId)
+	vals.Add("client_secret", clientSecret)
+	vals.Add("grant_type", "refresh_token")
+	vals.Add("refresh_token", refreshToken)
+
+	res, err := Run(&Request{
+		Method:  http.MethodPost,
+		Url:     ExchangeOAuthTokenUrl,
+		Params:  vals,
+		Timeout: timeout,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var t Token
+	if err := DecodeResponse(res, &t); err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
