@@ -227,7 +227,7 @@ func (b *IIRCBot) listen() {
 	}
 }
 
-var privMsgRegexp = regexp.MustCompile("PRIVMSG #(?P<Channel>[A-z-]+) :(?P<Message>.*)$")
+var privMsgRegexp = regexp.MustCompile("PRIVMSG #(?P<Channel>[A-z0-9-]+) :(?P<Message>.*)$")
 
 type PrivMessage struct {
 	Channel string
