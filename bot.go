@@ -239,11 +239,18 @@ type PrivMessage struct {
 //
 // In the future, we can make this handle different channel commands if we need.
 func (b *IIRCBot) processPrivMsg(msg string) {
+	channelIdx := privMsgRegexp.SubexpIndex("Channel")
+	messageIdx := privMsgRegexp.SubexpIndex("Message")
+
 	matches := privMsgRegexp.FindStringSubmatch(msg)
+	if len(matches) <= channelIdx || len(matches) <= messageIdx {
+		b.Log(logger.SeverityError, "Could not process private message. Msg: " + msg)
+		return
+	}
 
 	p := PrivMessage{}
-	p.Channel = matches[privMsgRegexp.SubexpIndex("Channel")]
-	p.Message = matches[privMsgRegexp.SubexpIndex("Message")]
+	p.Channel = matches[channelIdx]
+	p.Message = matches[messageIdx]
 
 	b.InvokeMessageListeners(p)
 }
