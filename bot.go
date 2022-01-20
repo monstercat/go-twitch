@@ -227,9 +227,13 @@ func (b *IIRCBot) listen() {
 	}
 }
 
-var privMsgRegexp = regexp.MustCompile("PRIVMSG #(?P<Channel>[A-z0-9-]+) :(?P<Message>.*)$")
+// Private Messages are formated as - prefix PRIVMSG #channel msg
+// The prefix can be, for example:
+// :nickname!user@host
+var privMsgRegexp = regexp.MustCompile("(:([A-z0-9-]+!)?(?P<Sender>[A-z0-9-]+)@[^ ]+)?( )?PRIVMSG #(?P<Channel>[A-z0-9-]+) :(?P<Message>.*)$")
 
 type PrivMessage struct {
+	Sender  string
 	Channel string
 	Message string
 }
@@ -241,16 +245,18 @@ type PrivMessage struct {
 func (b *IIRCBot) processPrivMsg(msg string) {
 	channelIdx := privMsgRegexp.SubexpIndex("Channel")
 	messageIdx := privMsgRegexp.SubexpIndex("Message")
+	senderIdx := privMsgRegexp.SubexpIndex("Sender")
 
 	matches := privMsgRegexp.FindStringSubmatch(msg)
-	if len(matches) <= channelIdx || len(matches) <= messageIdx {
-		b.Log(logger.SeverityError, "Could not process private message. Msg: " + msg)
+	if len(matches) <= channelIdx || len(matches) <= messageIdx || len(matches) <= senderIdx {
+		b.Log(logger.SeverityError, "Could not process private message. Msg: "+msg)
 		return
 	}
 
 	p := PrivMessage{}
 	p.Channel = matches[channelIdx]
 	p.Message = matches[messageIdx]
+	p.Sender = matches[senderIdx]
 
 	b.InvokeMessageListeners(p)
 }
