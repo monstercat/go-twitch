@@ -127,11 +127,11 @@ func (b *IIRCBot) Close() {
 		return
 	}
 
+	close(b.killConn)
 	if err := b.Conn.Close(); err != nil {
-		b.Log(logger.SeverityError, "Error closing IRRC bot. "+err.Error())
+		b.Log(logger.SeverityError, "Error closing IIRC bot. "+err.Error())
 	}
 	b.Conn = nil
-	close(b.killConn)
 }
 
 func (b *IIRCBot) connect(username, password string) error {
@@ -195,11 +195,11 @@ func (b *IIRCBot) listen() {
 			b.setReconnect()
 
 			if err == io.EOF {
-				b.Log(logger.SeverityError, "Reached EOF. Reconnecting")
+				b.Log(logger.SeverityError, "Reached EOF.")
 			} else if err != nil {
 				b.Log(logger.SeverityError, "Error reading. "+err.Error())
 			}
-			break
+			return
 		}
 
 		// Add to the buffer.
@@ -346,11 +346,7 @@ func (b *IIRCBot) Run(die <-chan struct{}) {
 			}
 
 			// Check flags first! If we need to reconnect, we should do that here.
-			if b.NeedsReconnect() {
-				// TODO: this is no good! We need to reconnect immediately and not send it to the queue.
-				//  also, we need to activate event listeners on reconnect.
-				//  finally, those listeners should be able to immediately send join commands after a successful
-				//  reconnection.
+			if b.NeedsReconnect() || b.Conn == nil {
 				if err := b.Connect(b.username, b.password); err != nil {
 					// We could not reconnect! Produce an error.
 					// Conn should still be null.
@@ -359,7 +355,11 @@ func (b *IIRCBot) Run(die <-chan struct{}) {
 					time.Sleep(time.Minute * 120)
 					continue
 				}
-				b.InvoiceRejoinListeners()
+
+				// If this sends commands to the queue, it might block (as the queue reading loop is below.
+				// We cannot allow it to lcok; therefore, we add it to a goroutine.
+				go b.InvokeRejoinListeners()
+
 				b.ClearReconnect()
 
 				continue

@@ -33,7 +33,7 @@ func (m *IIRCBotEventManager) InvokeMessageListeners(msg PrivMessage) {
 	}
 }
 
-func (m *IIRCBotEventManager) InvoiceRejoinListeners() {
+func (m *IIRCBotEventManager) InvokeRejoinListeners() {
 	for _, l := range m.rejoinListeners {
 		l()
 	}
